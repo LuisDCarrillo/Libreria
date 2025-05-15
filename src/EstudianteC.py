@@ -1,10 +1,11 @@
 class Estudiante:
-    def __init__(self,cedula, nombre, edad, carrera, razon_solicitud):
+    def __init__(self,cedula, nombre, edad, carrera, razon_solicitud, prioridad):
         self.cedula = cedula
         self.nombre = nombre
         self.edad = edad
         self.carrera = carrera
         self.razon_solicitud = razon_solicitud
+        self.prioridad = prioridad
 
     def mostrar_informacion(self):
         print(f"Nombre: {self.nombre}, Edad: {self.edad}, Carrera: {self.carrera}")

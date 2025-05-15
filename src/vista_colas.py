@@ -17,6 +17,7 @@ def dibujar_cola():
     canvas.delete("all")  # Limpiar el canvas antes de redibujar
 
     if cola.Vacia():
+        canvas.create_text(375, 40, text="[Espacio en memoria]", font=("Arial", 14))
         canvas.create_text(375, 80, text="[La cola está vacía]", font=("Arial", 14))
         canvas.create_rectangle(320, 130, 430, 190, fill="lightblue")
         canvas.create_line(410, 130, 410, 190, fill="black")
@@ -29,6 +30,7 @@ def dibujar_cola():
 
     p = cola.Frente
     while p is not None:
+        canvas.create_text(375, 40, text="[Espacio en memoria]", font=("Arial", 14))
         # Dibujar nodo (círculo + texto)
         canvas.create_rectangle(x, y-30, x+110, y+30, fill="lightblue")
         canvas.create_text(x+45, y, text=str(p.info.cedula), font=("Arial", 12))
@@ -61,13 +63,20 @@ def mostrar_estudiante_atendido(estudiante):
 
 # Función para insertar un elemento en la cola
 def insertar():
+    if not cola_cabe_en_canvas():
+        messagebox.showwarning("Error", "¡La cola está llena (memoria llena)!")
+        canvas.create_text(375, 80, text="[Cola llena (memoria llena)]", font=("Arial", 14))
+        return
+    
     cedula = entry_cedula.get()
     nombre = entry_nombre.get()
     edad = entry_edad.get()
     carrera = entry_carrera.get()
     razon = entry_razon.get()
-    estudiante = Estudiante(cedula, nombre, edad, carrera, razon)
-    if (cedula and nombre and edad and carrera and razon):
+    prioridad = int(entry_prioridad.get())
+    
+    if (cedula and nombre and edad and carrera and razon and prioridad):
+        estudiante = Estudiante(cedula, nombre, edad, carrera, razon, prioridad)
         if cola.Insertar(estudiante):
             dibujar_cola()
             estudiante.mostrar_informacion()
@@ -75,7 +84,7 @@ def insertar():
             messagebox.showinfo("Info", "Estudiante agregado a la cola.")
             cola.MostrarContenido()
         else:
-            messagebox.showerror("Error", "¡La cola está llena (memoria)!")
+            messagebox.showerror("Error", "¡La cola está llena (memoria llena)!")
     else:
         messagebox.showwarning("Advertencia", "Ingresa un valor.")
     limpiar_entradas()
@@ -88,6 +97,7 @@ def limpiar_entradas():
     entry_edad.delete(0, tk.END)
     entry_carrera.delete(0, tk.END)
     entry_razon.delete(0, tk.END)
+    entry_prioridad.delete(0, tk.END)
 
 # Remover elemento de la cola
 def remover():
@@ -98,7 +108,34 @@ def remover():
         if estudiante_removido:
             messagebox.showinfo("Info", f"Se atendió al estudiante: {estudiante_removido.cedula}")
         dibujar_cola()
+# Método para contar cantidad de nodos y calcula si hay espacio para uno más
+def cola_cabe_en_canvas():
+    longitud_cola = 0
+    nodo = cola.Frente
+    while nodo:
+        longitud_cola += 1
+        nodo = nodo.prox
+    
+    separacion = 130  # Igual que en dibujar_cola()
+    espacio_necesario = separacion * (longitud_cola + 1)
+    ancho_canvas = canvas.winfo_width()
 
+    return espacio_necesario <= ancho_canvas
+
+def ordenar_prioridad():
+    global cola
+    cola_aux = Cola()
+    i = 1
+    while i < 11:
+        p = cola.Frente
+        while p is not None:
+            if (p.info.prioridad == i):
+                cola_aux.Insertar(p.info)
+            p = p.prox
+        i += 1
+    cola_aux.MostrarContenido()
+    cola = cola_aux
+    dibujar_cola()
 #Creando el frame para el canvas
 frame_canvas = tk.Frame(ventana)
 frame_canvas.pack(side=tk.TOP)
@@ -114,8 +151,8 @@ scrollbar_horizontal.config(command=canvas.xview)
 
 # Etiqueta para mostrar el anuncio del estudiante siendo atendido
 anuncio = tk.Label(ventana, text="No hay estudiantes en la cola",
-font=("Arial", 12), fg="black", justify=tk.LEFT)
-anuncio.place(x=500, y=300) #OJO, cambiar la posición de la etiqueta para que no se superponga con el canvas
+font=("Arial", 12), fg="black", justify=tk.LEFT, highlightthickness=1, highlightbackground="black")
+anuncio.place(relx=0.8, rely=0.7, anchor="e")
 
 # Creando un frame (contenedor) para los botones y entradas
 # y organizando su disposición
@@ -130,44 +167,54 @@ label_txt_entrada = tk.Label(frame_entrada, text="Inserte los datos necesarios\n
 label_txt_entrada.pack(anchor="w")
 frame_cedula = tk.Frame(frame_entrada)
 frame_cedula.pack(anchor="w")
-label_txt_cedula = tk.Label(frame_cedula, text="Cédula:")
+label_txt_cedula = tk.Label(frame_cedula, text="Cédula:", width=7, anchor="w")
 label_txt_cedula.pack(side=tk.LEFT)
-entry_cedula = tk.Entry(frame_cedula, width=10)
+entry_cedula = tk.Entry(frame_cedula)
 entry_cedula.pack(side=tk.LEFT, padx=5)
 
 frame_nombre = tk.Frame(frame_entrada)
 frame_nombre.pack(anchor="w")
-label_txt_nombre = tk.Label(frame_nombre, text="Nombre:")
+label_txt_nombre = tk.Label(frame_nombre, text="Nombre:", width=7, anchor="w")
 label_txt_nombre.pack(side=tk.LEFT)
-entry_nombre = tk.Entry(frame_nombre, width=10)
+entry_nombre = tk.Entry(frame_nombre)
 entry_nombre.pack(side=tk.LEFT, padx=5)
 
 frame_edad = tk.Frame(frame_entrada)
 frame_edad.pack(anchor="w")
-label_txt_edad = tk.Label(frame_edad, text="Edad:")
+label_txt_edad = tk.Label(frame_edad, text="Edad:", width=7, anchor="w")
 label_txt_edad.pack(side=tk.LEFT)
-entry_edad = tk.Entry(frame_edad , width=10)
+entry_edad = tk.Entry(frame_edad)
 entry_edad.pack(side=tk.LEFT, padx=5)
 
 frame_carrera = tk.Frame(frame_entrada)
 frame_carrera.pack(anchor="w")
-label_txt_carrera = tk.Label(frame_carrera, text="Carrera:")
+label_txt_carrera = tk.Label(frame_carrera, text="Carrera:" , width=7, anchor="w")
 label_txt_carrera.pack(side=tk.LEFT)
-entry_carrera = tk.Entry(frame_carrera , width=10)
+entry_carrera = tk.Entry(frame_carrera)
 entry_carrera.pack(side=tk.LEFT , padx=5)
 
 frame_razon = tk.Frame(frame_entrada)
 frame_razon.pack(anchor="w")
-label_txt_razon = tk.Label(frame_razon, text="Razón:")
+label_txt_razon = tk.Label(frame_razon, text="Razón:", width=7, anchor="w")
 label_txt_razon.pack(side=tk.LEFT)
-entry_razon = tk.Entry(frame_razon, width=10)
+entry_razon = tk.Entry(frame_razon)
 entry_razon.pack(side=tk.LEFT , padx=5)
+
+frame_prioridad = tk.Frame(frame_entrada)
+frame_prioridad.pack(anchor="w")
+label_txt_prioridad = tk.Label(frame_prioridad, text="Prioridad:", width=7, anchor="w")
+label_txt_prioridad.pack(side=tk.LEFT)
+entry_prioridad = tk.Entry(frame_prioridad)
+entry_prioridad.pack(side=tk.LEFT , padx=5)
 
 btn_insertar = tk.Button(frame_botones, text="Insertar", command=insertar)
 btn_insertar.pack(side=tk.LEFT, padx=5)
 
 btn_remover = tk.Button(frame_botones, text="Remover", command=remover)
 btn_remover.pack(side=tk.LEFT, padx=5)
+
+btn_ordenar = tk.Button(frame_botones, text="Ordenar por prioridad", command=ordenar_prioridad)
+btn_ordenar.pack(side=tk.LEFT, padx=5)
 
 # Mostrar cola inicial
 dibujar_cola()

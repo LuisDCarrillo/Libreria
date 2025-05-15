@@ -54,6 +54,3 @@ class Cola:
                 self.Final = None
             return valor
         return None  # Si la cola está vacía, no hay nada que remover
-
-
-
