@@ -1,3 +1,4 @@
+
 class Nodo:
     def __init__(self, valor=None):
         self.info = valor  # Almacena el valor del nodo
