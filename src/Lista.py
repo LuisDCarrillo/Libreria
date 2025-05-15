@@ -1,4 +1,3 @@
-# comentario
 
 class Nodo:
     def __init__(self, valor=None):
@@ -109,6 +108,15 @@ class Lista:
         while not listaFuente.Vacia():
             valor = listaFuente.EliComienzo()  # Elimina el primer valor de la listaFuente
             listaDestino.InsComienzo(valor)  # Inserta el valor al principio de listaDestino
+
+    def obtener_todos(self):
+        """Devuelve una lista con todos los elementos de la lista enlazada."""
+        elementos = []
+        p = self.Primero
+        while p is not None:
+            elementos.append(p.info)
+            p = p.prox
+        return elementos
 
     def __del__(self):
         #Destructor para liberar los recursos cuando la lista es destruida"""

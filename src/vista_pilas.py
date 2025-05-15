@@ -1,199 +1,224 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from Pila import Pila
+from Pila import Pila, NodoPila
 
-class VersionControlApp:
-    def __init__(self, root):
+# Supongamos que este es el diccionario de créditos por materia
+MATERIAS_CREDITOS = {
+    "Matemáticas": 4,
+    "Física": 4,
+    "Programación": 3,
+    "Historia": 3
+}
+
+class InscripcionesApp:
+    def __init__(self, root, estudiante=None, on_close=None, materias_creditos=None):
         self.root = root
-        self.pila = Pila()
-        self.contador_versiones = 0
-        
+        self.on_close = on_close
+        self.estudiante = estudiante
+        self.materias_creditos = materias_creditos or {}
+
+        if estudiante:
+            # Cargar materias del estudiante
+            materias = estudiante.materias if isinstance(estudiante.materias, list) else estudiante.materias.split(',')
+            self.pila = Pila()
+            for materia in materias:
+                if materia.strip():
+                    self.pila.Insertar(materia.strip())
+        else:
+            self.pila = Pila()
+
+        self.materias = list(self.materias_creditos.keys())
         self.configurar_interfaz()
         self.crear_widgets()
+        if estudiante:
+            self.actualizar_interfaz()
+        self.root.protocol("WM_DELETE_WINDOW", self.cerrar_ventana)
 
     def configurar_interfaz(self):
-        self.root.title("Control de Versiones CUMLAUDE")
+        self.root.title("Gestión de Inscripciones")
         self.root.geometry("800x600")
-        self.root.resizable(False, False)
         self.root.configure(bg='#f0f0f0')
 
     def crear_widgets(self):
         # Frame principal
         self.frame_principal = ttk.Frame(self.root)
-        self.frame_principal.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.frame_principal.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
 
-        # Frame de entrada
-        self.frame_entrada = ttk.Frame(self.frame_principal)
-        self.frame_entrada.pack(fill=tk.X, pady=(0, 10))
+        # Información del estudiante
+        self.label_estudiante = ttk.Label(self.frame_principal, text="Estudiante: No seleccionado", font=("Arial", 12))
+        self.label_estudiante.pack(pady=10)
 
-        self.label_txt_titulo = ttk.Label(
-            self.frame_entrada, 
-            text="Agregar Nueva Versión",
-            font=('Arial', 12, 'bold')
+        # Selección de materia
+        self.frame_seleccion = ttk.LabelFrame(self.frame_principal, text="Inscripción de Materias Disponibles")
+        self.frame_seleccion.pack(fill=tk.X, pady=10)
+
+        # Actualizar el combobox con las materias de materias_creditos
+        self.combo_materias = ttk.Combobox(
+            self.frame_seleccion, 
+            values=self.materias,  # Materias dinámicas de materias_creditos
+            state="readonly"
         )
-        self.label_txt_titulo.grid(row=0, column=0, columnspan=2, pady=5)
+        self.combo_materias.pack(side=tk.LEFT, padx=5, pady=5)
 
-        self.label_txt_autor = ttk.Label(self.frame_entrada, text="Autor:")
-        self.label_txt_autor.grid(row=1, column=0, sticky=tk.W, padx=5)
-        
-        self.entry_autor = ttk.Entry(self.frame_entrada, width=40)
-        self.entry_autor.grid(row=1, column=1, padx=5, pady=2, sticky=tk.W)
-        
-        self.label_txt_cambios = ttk.Label(self.frame_entrada, text="Cambios realizados:")
-        self.label_txt_cambios.grid(row=2, column=0, sticky=tk.W, padx=5)
-        
-        self.entry_cambios = ttk.Entry(self.frame_entrada, width=40)
-        self.entry_cambios.grid(row=2, column=1, padx=5, pady=2, sticky=tk.W)
-        
-        self.btn_agregar = ttk.Button(
-            self.frame_entrada, 
-            text="Agregar Versión", 
-            command=self.agregar_version
+        self.btn_inscribir = ttk.Button(
+            self.frame_seleccion, 
+            text="Inscribir", 
+            command=self.inscribir_materia
         )
-        self.btn_agregar.grid(row=3, column=0, columnspan=2, pady=5)
+        self.btn_inscribir.pack(side=tk.LEFT, padx=5)
 
-        # Frame de acciones
+        # Acciones
         self.frame_acciones = ttk.Frame(self.frame_principal)
-        self.frame_acciones.pack(fill=tk.X, pady=(0, 10))
-        
-        self.btn_revertir = ttk.Button(
-            self.frame_acciones, 
-            text="Revertir Versión", 
-            command=self.revertir_version
-        )
-        self.btn_revertir.pack(side=tk.LEFT, padx=5)
-        
-        self.btn_limpiar = ttk.Button(
-            self.frame_acciones, 
-            text="Limpiar Todo", 
-            command=self.limpiar_todo
-        )
-        self.btn_limpiar.pack(side=tk.LEFT, padx=5)
+        self.frame_acciones.pack(fill=tk.X, pady=10)
 
-        # Frame de visualización
-        self.frame_visualizacion = ttk.Frame(self.frame_principal)
-        self.frame_visualizacion.pack(fill=tk.BOTH, expand=True)
-        
-        self.label_txt_historial = ttk.Label(
-            self.frame_visualizacion, 
-            text="Historial de Versiones",
-            font=('Arial', 12, 'bold')
+        self.btn_desinscribir = ttk.Button(
+            self.frame_acciones, 
+            text="Desinscribir Última Materia", 
+            command=self.desinscribir_materia
         )
-        self.label_txt_historial.pack()
-        
-        self.text_historial = tk.Text(
-            self.frame_visualizacion, 
-            width=80, 
-            height=15, 
-            wrap=tk.WORD,
-            state=tk.DISABLED
-        )
-        self.text_historial.pack(fill=tk.BOTH, expand=True)
+        self.btn_desinscribir.pack(side=tk.LEFT, padx=5)
 
-        # Frame de gráfico
-        self.frame_grafico = ttk.Frame(self.frame_principal)
-        self.frame_grafico.pack(fill=tk.X, pady=(10, 0))
-        
-        self.canvas_pila = tk.Canvas(
-            self.frame_grafico, 
+        # Historial
+        self.frame_historial = ttk.LabelFrame(self.frame_principal, text="Materias Inscritas")
+        self.frame_historial.pack(fill=tk.BOTH, expand=True)
+
+        self.lista_materias = tk.Listbox(
+            self.frame_historial, 
+            height=10,
+            font=('Arial', 10)
+        )
+        self.lista_materias.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+        # Representación gráfica
+        self.frame_pila = ttk.LabelFrame(self.frame_principal, text="Estructura de Pila")
+        self.frame_pila.pack(fill=tk.X, pady=10)
+
+        self.canvas = tk.Canvas(
+            self.frame_pila, 
             bg='white', 
-            height=180,
-            highlightthickness=1,
-            highlightbackground="#cccccc"
+            height=150,
+            highlightthickness=0
         )
-        self.canvas_pila.pack(fill=tk.X)
+        self.canvas.pack(fill=tk.X, padx=5, pady=5)
 
-    def agregar_version(self):
-        autor = self.entry_autor.get()
-        cambios = self.entry_cambios.get()
-        
-        if not autor or not cambios:
-            messagebox.showwarning("Error", "Debe completar ambos campos")
+    def inscribir_materia(self):
+        materia = self.combo_materias.get()
+
+        if not materia:
+            messagebox.showwarning("Error", "Seleccione una materia")
             return
-        
-        # Adaptación para usar tu Pila.py original
-        self.contador_versiones += 1
-        datos_version = {
-            'id': self.contador_versiones,
-            'autor': autor,
-            'cambios': cambios
-        }
-        
-        if not self.pila.Llena():
-            self.pila.Insertar(datos_version)
-            messagebox.showinfo("Éxito", f"Versión {self.contador_versiones} agregada")
-            self.entry_autor.delete(0, tk.END)
-            self.entry_cambios.delete(0, tk.END)
-            self.actualizar_interfaz()
-        else:
-            messagebox.showerror("Error", "No se pudo agregar la versión")
 
-    def revertir_version(self):
-        version = self.pila.Remover()
-        if version:
-            self.contador_versiones -= 1
-            messagebox.showinfo("Revertido", 
-                f"Versión {version['id']} revertida")  # Cambia aquí
-            self.actualizar_interfaz()
-        else:
-            messagebox.showwarning("Error", "No hay versiones para revertir")
+        # Verificar si la materia ya está inscrita
+        if self.materia_ya_inscrita(materia):
+            messagebox.showwarning("Error", f"Ya está inscrito en {materia}")
+            return
 
-    def limpiar_todo(self):
-        if messagebox.askyesno("Confirmar", "¿Desea limpiar todo el historial?"):
-            self.pila = Pila()
-            self.contador_versiones = 0
+        # Validar restricciones de inscripción
+        creditos_totales = sum(self.materias_creditos[m] for m in self.pila.obtener_contenido() if m in self.materias_creditos)
+        if materia in self.materias_creditos:
+            creditos_totales += self.materias_creditos[materia]
+
+        if creditos_totales > 16:
+            messagebox.showerror("Error de Créditos", "No se puede inscribir porque excede el límite de créditos.")
+            return
+
+        # Insertar la materia en la pila
+        if self.pila.Insertar(materia):
             self.actualizar_interfaz()
+            messagebox.showinfo("Éxito", f"Inscrito en {materia}")
+
+            # Actualizar la vista de lista
+            if self.on_close and self.estudiante:
+                materias_actuales = list(reversed(self.pila.obtener_contenido()))
+                self.estudiante.materias = materias_actuales
+                self.on_close(self.estudiante)
+        else:
+            messagebox.showerror("Error", "No se pudo inscribir (memoria llena)")
+
+    def desinscribir_materia(self):
+        # Remover la última materia inscrita
+        materia = self.pila.Remover()
+        if materia:
+            self.actualizar_interfaz()
+            messagebox.showinfo("Desinscrito", f"Se eliminó: {materia}")
+        else:
+            messagebox.showwarning("Error", "No hay materias inscritas")
+
+    def materia_ya_inscrita(self, materia):
+        # Usar tu método ObtenerContenido()
+        return materia in self.pila.obtener_contenido()
 
     def actualizar_interfaz(self):
-        self.actualizar_historial()
+        # Mostrar información del estudiante
+        if self.estudiante:
+            self.label_estudiante.config(text=f"Estudiante: {self.estudiante.nombre} ({self.estudiante.cedula})")
+        # Actualizar lista de materias
+        self.lista_materias.delete(0, tk.END)
+        for materia in reversed(self.pila.obtener_contenido()):
+            self.lista_materias.insert(tk.END, materia)
+        # Dibujar pila
         self.dibujar_pila()
 
-    def actualizar_historial(self):
-        self.text_historial.config(state=tk.NORMAL)
-        self.text_historial.delete(1.0, tk.END)
-        
-        contenido = self.pila.obtener_contenido()
-        if not contenido:
-            self.text_historial.insert(tk.END, "No hay versiones registradas.")
-        else:
-            for version in contenido:
-                self.text_historial.insert(tk.END, 
-                    f"Versión {version['id']}\n"
-                    f"Autor: {version['autor']}\n"
-                    f"Cambios: {version['cambios']}\n"
-                    f"{'-'*50}\n\n")
-        
-        self.text_historial.config(state=tk.DISABLED)
-
     def dibujar_pila(self):
-        self.canvas_pila.delete("all")
+        self.canvas.delete("all")
         contenido = self.pila.obtener_contenido()
+        
         if not contenido:
-            self.canvas_pila.create_text(150, 90, text="Pila vacía", font=('Arial', 12))
+            self.canvas.create_text(150, 75, text="Pila vacía", font=('Arial', 12))
             return
 
-        width = self.canvas_pila.winfo_width()
-        x = width // 2
+        ancho = self.canvas.winfo_width()
+        x = ancho // 2
         y = 20
-        rect_width = 200
-        rect_height = 30
+        ancho_rect = 200
+        alto_rect = 30
 
-        for i, version in enumerate(contenido):
-            color = "#d9e6f2" if i % 2 == 0 else "#c4d9f2"
-            self.canvas_pila.create_rectangle(
-                x - rect_width//2, y,
-                x + rect_width//2, y + rect_height,
-                fill=color, outline="#4a90d9"
+        for i, materia in enumerate(contenido):
+            color = "#E3F2FD" if i % 2 == 0 else "#BBDEFB"
+            
+            # Rectángulo
+            self.canvas.create_rectangle(
+                x - ancho_rect//2, y,
+                x + ancho_rect//2, y + alto_rect,
+                fill=color, outline="#1976D2"
             )
-            self.canvas_pila.create_text(
-                x, y + rect_height//2,
-                text=f"Versión {version['id']}: {version['autor']}",
-                font=('Arial', 8)
+            
+            # Texto
+            self.canvas.create_text(
+                x, y + alto_rect//2,
+                text=materia,
+                font=('Arial', 9)
             )
+            
+            # Indicador TOP
             if i == 0:
-                self.canvas_pila.create_text(
-                    x + rect_width//2 - 10, y + 5,
-                    text="TOP", font=('Arial', 7, 'bold'),
-                    fill="red"
+                self.canvas.create_text(
+                    x + ancho_rect//2 - 15, y + 5,
+                    text="TOP", 
+                    font=('Arial', 7, 'bold'),
+                    fill="#D32F2F"
                 )
-            y += rect_height + 5
+            
+            y += alto_rect + 5
+
+    def cerrar_ventana(self):
+        # Actualizar las materias del estudiante al cerrar la ventana
+        if self.on_close and self.estudiante:
+            materias_actuales = list(reversed(self.pila.obtener_contenido()))
+            creditos_totales = sum(MATERIAS_CREDITOS[m] for m in materias_actuales if m in MATERIAS_CREDITOS)
+
+            if creditos_totales > 16:
+                messagebox.showerror("Error de Créditos", "No se puede guardar porque excede el límite de créditos.")
+                return
+
+            self.estudiante.materias = materias_actuales
+            self.on_close(self.estudiante)
+        self.root.destroy()
+
+def main():
+    root = tk.Tk()
+    app = InscripcionesApp(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()

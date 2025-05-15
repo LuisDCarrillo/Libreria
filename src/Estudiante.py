@@ -1,10 +1,11 @@
 class Estudiante:
-    def __init__(self,identificacion, nombre, edad, materias, uc_aprobadas):
-        self.identificacion = identificacion
+    def __init__(self, cedula, nombre, carrera, materias, uc_aprobadas):
+        self.cedula = cedula
         self.nombre = nombre
-        self.edad = edad
+        self.carrera = carrera
         self.materias = materias
         self.uc_aprobadas = uc_aprobadas
+        self.creditos_totales = 0
     
     def getInfo(self):
-        return [self.identificacion, self.nombre, self.edad, self.materias, self.uc_aprobadas]
+        return [self.cedula, self.nombre, self.carrera, self.materias, self.uc_aprobadas]

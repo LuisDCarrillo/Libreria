@@ -1,6 +1,7 @@
 import tkinter as tk
 import subprocess
-from vista_pilas import VersionControlApp
+import os
+from vista_pilas import InscripcionesApp
 
 # Funciones para los botones
 def abrir_listas():
@@ -8,11 +9,17 @@ def abrir_listas():
 
 def abrir_pilas():
     ventana_pilas = tk.Tk()
-    app = VersionControlApp(ventana_pilas)
+    app = InscripcionesApp(ventana_pilas)
     ventana_pilas.mainloop()
 
 def abrir_colas():
     subprocess.run(["python", "src/vista_colas.py"])
+
+# Función para borrar los datos de estudiantes inscritos
+def borrar_datos_estudiantes():
+    temp_file = "temp_estudiantes.json"
+    if os.path.exists(temp_file):
+        os.remove(temp_file)
 
 # Crear ventana principal
 ventana = tk.Tk()
@@ -25,9 +32,12 @@ btn_pilas = tk.Button(ventana, text="Pilas", command=abrir_pilas)
 btn_colas = tk.Button(ventana, text="Colas", command=abrir_colas)
 
 # Ubicar botones en la ventana
-btn_listas.pack(pady=10)  # Espacio entre botones
+btn_listas.pack(pady=10)
 btn_pilas.pack(pady=10)
 btn_colas.pack(pady=10)
+
+# Vincular la función al evento de cierre de la ventana principal
+ventana.protocol("WM_DELETE_WINDOW", lambda: (borrar_datos_estudiantes(), ventana.destroy()))
 
 # Ejecutar ventana principal
 ventana.mainloop()
