@@ -1,16 +1,10 @@
 import tkinter as tk
 import subprocess
 import os
-from vista_pilas import InscripcionesApp
 
 # Funciones para los botones
 def abrir_listas():
-    subprocess.run(["python", "src/vista_lista.py"])
-
-def abrir_pilas():
-    ventana_pilas = tk.Tk()
-    app = InscripcionesApp(ventana_pilas)
-    ventana_pilas.mainloop()
+    subprocess.run(["python", "vista_lista.py"])
 
 def abrir_colas():
     subprocess.run(["python", "src/vista_colas.py"])
@@ -26,15 +20,29 @@ ventana = tk.Tk()
 ventana.title("Ventana con Botones")
 ventana.geometry("300x200")
 
-# Crear botones
-btn_listas = tk.Button(ventana, text="Listas", command=abrir_listas)
-btn_pilas = tk.Button(ventana, text="Pilas", command=abrir_pilas)
-btn_colas = tk.Button(ventana, text="Colas", command=abrir_colas)
+# Centrar la ventana en la pantalla
+def centrar_ventana():
+    ventana.update_idletasks()
+    ancho = ventana.winfo_width()
+    alto = ventana.winfo_height()
+    x = (ventana.winfo_screenwidth() // 2) - (ancho // 2)
+    y = (ventana.winfo_screenheight() // 2) - (alto // 2)
+    ventana.geometry(f'{ancho}x{alto}+{x}+{y}')
 
-# Ubicar botones en la ventana
+# Crear frame para centrar los botones
+frame_centro = tk.Frame(ventana)
+frame_centro.place(relx=0.5, rely=0.5, anchor="center")
+
+# Crear botones
+btn_listas = tk.Button(frame_centro, text="Listas", command=abrir_listas)
+btn_colas = tk.Button(frame_centro, text="Colas", command=abrir_colas)
+
+# Ubicar botones en el frame
 btn_listas.pack(pady=10)
-btn_pilas.pack(pady=10)
 btn_colas.pack(pady=10)
+
+# Centrar la ventana
+centrar_ventana()
 
 # Vincular la función al evento de cierre de la ventana principal
 ventana.protocol("WM_DELETE_WINDOW", lambda: (borrar_datos_estudiantes(), ventana.destroy()))
