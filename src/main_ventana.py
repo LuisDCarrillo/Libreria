@@ -4,7 +4,7 @@ import os
 
 # Funciones para los botones
 def abrir_listas():
-    subprocess.run(["python", "vista_lista.py"])
+    subprocess.run(["python", "src/vista_lista.py"])
 
 def abrir_colas():
     subprocess.run(["python", "src/vista_colas.py"])
