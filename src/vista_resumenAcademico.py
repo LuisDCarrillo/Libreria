@@ -91,14 +91,14 @@ class vistaRA:
         p = self.vista_lista.lista_ingresados.Primero
         while p:
             estudiante = p.info
-            if hasattr(estudiante, 'edad'): 
+            if hasattr(estudiante, 'carrera'): 
                 carreras.add(estudiante.edad.strip())
             p = p.prox
 
         p = self.vista_lista.lista_no_ingresados.Primero
         while p:
             estudiante = p.info
-            if hasattr(estudiante, 'edad'):
+            if hasattr(estudiante, 'carrera'):
                 carreras.add(estudiante.edad.strip())
             p = p.prox
 
@@ -187,7 +187,7 @@ class vistaRA:
         estudiantes_filtrados = []
 
         materias_seleccionadas = [materia for var, materia in zip(self.variablesM, self.obtener_materias()) if var.get() == 1]
-        carreras_seleccionadas = [edad for var, edad in zip(self.variablesC, self.obtener_carreras()) if var.get() == 1]
+        carreras_seleccionadas = [carrera for var, carrera in zip(self.variablesC, self.obtener_carreras()) if var.get() == 1]
 
         if not materias_seleccionadas and not carreras_seleccionadas:
             messagebox.showinfo("PDF", "No has seleccionado ninguna materia o carrera.")
@@ -201,13 +201,13 @@ class vistaRA:
             estudiante = nodo.info
 
             filtro_materia = any(materia in estudiante.materias for materia in materias_seleccionadas) if materias_seleccionadas else True
-            filtro_carrera = estudiante.edad in carreras_seleccionadas if carreras_seleccionadas else True
+            filtro_carrera = estudiante.carrera in carreras_seleccionadas if carreras_seleccionadas else True
 
             if filtro_materia and filtro_carrera:
                 estudiantes_filtrados.append([
-                    Paragraph(str(estudiante.identificacion), estilos["Normal"]),
+                    Paragraph(str(estudiante.cedula), estilos["Normal"]),
                     Paragraph(estudiante.nombre, estilos["Normal"]),
-                    Paragraph(str(estudiante.edad), estilos["Normal"]),
+                    Paragraph(str(estudiante.carrera), estilos["Normal"]),
                     Paragraph(str(estudiante.uc_aprobadas), estilos["Normal"]),
                     Paragraph(", ".join(estudiante.materias), estilos["Normal"])
                 ])
@@ -219,13 +219,13 @@ class vistaRA:
             estudiante = nodo.info
 
             filtro_materia = any(materia in estudiante.materias for materia in materias_seleccionadas) if materias_seleccionadas else True
-            filtro_carrera = estudiante.edad in carreras_seleccionadas if carreras_seleccionadas else True
+            filtro_carrera = estudiante.carrera in carreras_seleccionadas if carreras_seleccionadas else True
 
             if filtro_materia and filtro_carrera:
                 estudiantes_filtrados.append([
-                    Paragraph(str(estudiante.identificacion), estilos["Normal"]),
+                    Paragraph(str(estudiante.cedula), estilos["Normal"]),
                     Paragraph(estudiante.nombre, estilos["Normal"]),
-                    Paragraph(str(estudiante.edad), estilos["Normal"]),
+                    Paragraph(str(estudiante.carrera), estilos["Normal"]),
                     Paragraph(str(estudiante.uc_aprobadas), estilos["Normal"]),
                     Paragraph(", ".join(estudiante.materias), estilos["Normal"])
                 ])
@@ -240,7 +240,7 @@ class vistaRA:
         elementos = []
 
         encabezados = [
-            Paragraph("ID", estilos["Heading3"]),
+            Paragraph("Cedula", estilos["Heading3"]),
             Paragraph("Nombre", estilos["Heading3"]),
             Paragraph("Carrera", estilos["Heading3"]),
             Paragraph("Materias", estilos["Heading3"]),
