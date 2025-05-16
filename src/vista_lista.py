@@ -4,6 +4,7 @@ from Estudiante import Estudiante
 from Lista import Lista
 from collections import defaultdict
 from Identificacion_estudiante import VistaIdentificacion_estudiantes
+import vista_resumenAcademico as vra
 from detector_duplicados import detectar_duplicados
 from Pila import Pila
 import json
@@ -166,6 +167,7 @@ class VistaListaApp:
         tk.Button(self.frame_btns, text="Identificacion de estudiantes", command=self.identificacion_estudiantes).grid(row=1, column=2, pady=5)
         tk.Button(self.frame_btns, text="Reportes Estadísticos", command=self.mostrar_reportes).grid(row=1, column=3, columnspan=4, pady=5)
         tk.Button(self.frame_btns, text="Ver Rendimiento Académico", command=self.ventana_rendimiento).grid(row=2, column=2, pady=5)
+        ttk.Button(self.root, text="Generar Resumen Académico", command=self.abrir_vistaRA).pack(pady=50)
 
         btn_style = {'padx': 5, 'pady': 2, 'width': 20}
 
@@ -368,7 +370,9 @@ class VistaListaApp:
 
 
 
-
+    def abrir_vistaRA(self):
+        nueva_ventana = tk.Toplevel(self.root)
+        app_vistaRA = vra.vistaRA(nueva_ventana,self)
 
     def eliminar_estudiante(self, lista):
      cedula = self.entries["cédula"].get().strip()
