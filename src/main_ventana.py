@@ -1,11 +1,20 @@
 import tkinter as tk
-import subprocess
 import os
 from vista_pilas import InscripcionesApp
+from vista_lista import VistaListaApp
+from vista_colas import VistaColasApp
+
+# Función para borrar los datos de estudiantes inscritos
+def borrar_datos_estudiantes():
+    temp_file = "temp_estudiantes.json"
+    if os.path.exists(temp_file):
+        os.remove(temp_file)
 
 # Funciones para los botones
 def abrir_listas():
-    subprocess.run(["python", "src/vista_lista.py"])
+    ventana_listas = tk.Tk()
+    app = VistaListaApp(ventana_listas)
+    ventana_listas.mainloop()
 
 def abrir_pilas():
     ventana_pilas = tk.Tk()
@@ -13,13 +22,9 @@ def abrir_pilas():
     ventana_pilas.mainloop()
 
 def abrir_colas():
-    subprocess.run(["python", "src/vista_colas.py"])
-
-# Función para borrar los datos de estudiantes inscritos
-def borrar_datos_estudiantes():
-    temp_file = "temp_estudiantes.json"
-    if os.path.exists(temp_file):
-        os.remove(temp_file)
+    ventana_colas = tk.Tk()
+    app = VistaColasApp(ventana_colas)
+    ventana_colas.mainloop()
 
 # Crear ventana principal
 ventana = tk.Tk()

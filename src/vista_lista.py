@@ -551,54 +551,54 @@ class VistaListaApp:
     def seleccionar_nodo(self, nodo):
         self.nodo_seleccionado = nodo
         self.actualizar_grafo()
-     def ventana_rendimiento(self):
-            ventana = tk.Toplevel(self.root)
-            ventana.title("Clasificación por Rendimiento Académico")
-            ventana.geometry("900x400")
-    
-            frame_tablas = tk.Frame(ventana)
-            frame_tablas.pack(fill="both", expand=True, padx=10, pady=10)
-    
-            rendimiento = {
-                "Alto Rendimiento": [],
-                "Rendimiento Medio": [],
-                "Bajo Rendimiento": []
-            }
-    
-            def recorrer_lista(lista):
-                p = lista.Primero
-                while p:
-                    estudiante = p.info
-                    try:
-                        uc = float(estudiante.uc_aprobadas)
-                    except:
-                        uc = 0
-                    num_materias = len(estudiante.materias)
-    
-                    if uc >= 16 and num_materias >= 4:
-                        rendimiento["Alto Rendimiento"].append(estudiante)
-                    elif (12 <= uc < 16 and num_materias >= 3) or (uc >= 16 and num_materias == 3):
-                        rendimiento["Rendimiento Medio"].append(estudiante)
-                    else:
-                        rendimiento["Bajo Rendimiento"].append(estudiante)
-                    p = p.prox
-    
-            recorrer_lista(self.lista_ingresados)
-            for i, (categoria, estudiantes) in enumerate(rendimiento.items()):
-                        frame = tk.Frame(frame_tablas)
-                        frame.grid(row=0, column=i, padx=5, sticky="nsew")
-                        tk.Label(frame, text=categoria, font=("Arial", 12, "bold")).pack()
-                        tree = ttk.Treeview(frame, columns=("Cedula", "Nombre", "Carrera", "Materias", "UC"), show="headings", height=10)
-                        for col in tree["columns"]:
-                            tree.heading(col, text=col)
-                            tree.column(col, width=100)
-                        tree.pack()
-                        for est in estudiantes:
-                            tree.insert("", tk.END, values=est.getInfo())
-    
-            for i in range(3):
-                frame_tablas.grid_columnconfigure(i, weight=1)  
-     
+
+    def ventana_rendimiento(self):
+        ventana = tk.Toplevel(self.root)
+        ventana.title("Clasificación por Rendimiento Académico")
+        ventana.geometry("900x400")
+
+        frame_tablas = tk.Frame(ventana)
+        frame_tablas.pack(fill="both", expand=True, padx=10, pady=10)
+
+        rendimiento = {
+            "Alto Rendimiento": [],
+            "Rendimiento Medio": [],
+            "Bajo Rendimiento": []
+        }
+
+        def recorrer_lista(lista):
+            p = lista.Primero
+            while p:
+                estudiante = p.info
+                try:
+                    uc = float(estudiante.uc_aprobadas)
+                except:
+                    uc = 0
+                num_materias = len(estudiante.materias)
+
+                if uc >= 16 and num_materias >= 4:
+                    rendimiento["Alto Rendimiento"].append(estudiante)
+                elif (12 <= uc < 16 and num_materias >= 3) or (uc >= 16 and num_materias == 3):
+                    rendimiento["Rendimiento Medio"].append(estudiante)
+                else:
+                    rendimiento["Bajo Rendimiento"].append(estudiante)
+                p = p.prox
+
+        recorrer_lista(self.lista_ingresados)
+        for i, (categoria, estudiantes) in enumerate(rendimiento.items()):
+            frame = tk.Frame(frame_tablas)
+            frame.grid(row=0, column=i, padx=5, sticky="nsew")
+            tk.Label(frame, text=categoria, font=("Arial", 12, "bold")).pack()
+            tree = ttk.Treeview(frame, columns=("Cedula", "Nombre", "Carrera", "Materias", "UC"), show="headings", height=10)
+            for col in tree["columns"]:
+                tree.heading(col, text=col)
+                tree.column(col, width=100)
+            tree.pack()
+            for est in estudiantes:
+                tree.insert("", tk.END, values=est.getInfo())
+
+        for i in range(3):
+            frame_tablas.grid_columnconfigure(i, weight=1)
 
     def mostrar_reportes(self):
         reportes_window = tk.Toplevel(self.root)
