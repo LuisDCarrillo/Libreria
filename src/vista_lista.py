@@ -47,30 +47,39 @@ class VistaListaApp:
         self.nodo_seleccionado = None
         self.root = root
         self.root.title("Gestión de Estudiantes")
+        
+        # Set window to maximized state
+        self.root.state('zoomed')  # This works for both Windows and Linux/Mac
+
+        # Create a frame to hold everything and center it
+        self.main_frame = tk.Frame(self.root)
+        self.main_frame.pack(expand=True, fill='both')
 
         # Scroll
-        self.scroll_canvas = tk.Canvas(self.root)
+        self.scroll_canvas = tk.Canvas(self.main_frame)
         self.scroll_canvas.pack(side="left", fill="both", expand=True)
 
-        scrollbar = tk.Scrollbar(self.root, orient="vertical", command=self.scroll_canvas.yview)
+        scrollbar = tk.Scrollbar(self.main_frame, orient="vertical", command=self.scroll_canvas.yview)
         scrollbar.pack(side="right", fill="y")
 
         self.scroll_canvas.configure(yscrollcommand=scrollbar.set)
 
         # Frame dentro del canvas donde irá todo el contenido
         self.scroll_frame = tk.Frame(self.scroll_canvas)
-        self.scroll_canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
+        self.scroll_canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw", width=self.scroll_canvas.winfo_width())
 
         # región scrollable
-        self.scroll_frame.bind("<Configure>", lambda e: self.scroll_canvas.configure(scrollregion=self.scroll_canvas.bbox("all")))
+        self.scroll_frame.bind("<Configure>", self._on_frame_configure)
 
-        
+        # Center the content horizontally and handle resizing
+        self.scroll_canvas.bind('<Configure>', self._on_canvas_configure)
+
         self.lista_ingresados = Lista()
         self.lista_no_ingresados = Lista()
 
         self.pila_versiones = Pila()  # <-- Instancia de la pila para versiones
         
-        self.titulo = tk.Label(self.root, text="Gestión de Estudiantes", font=("Arial", 20))
+        self.titulo = tk.Label(self.main_frame, text="Gestión de Estudiantes", font=("Arial", 20))
 
         # 
         self.titulo = tk.Label(self.scroll_frame, text="Gestión de Estudiantes", font=("Arial", 20))
@@ -166,7 +175,7 @@ class VistaListaApp:
         # self.label_img_grafo.pack(pady=10)
         # Canvas para dibujar
 
-        self.canvas = tk.Canvas(self.root, bg="white")
+        self.canvas = tk.Canvas(self.main_frame, bg="white")
         # Canvas para el grafo
         self.canvas = tk.Canvas(self.scroll_frame, bg="white")
         self.canvas.pack(fill=tk.BOTH, padx=20, pady=20, expand=True)
@@ -867,6 +876,14 @@ class VistaListaApp:
         except FileNotFoundError:
             pass
 
+    def _on_frame_configure(self, event=None):
+        """Reset the scroll region to encompass the inner frame"""
+        self.scroll_canvas.configure(scrollregion=self.scroll_canvas.bbox("all"))
+
+    def _on_canvas_configure(self, event):
+        """Update the frame width when the canvas is resized"""
+        # Update the width of the frame to match the canvas width
+        self.scroll_canvas.itemconfig(self.scroll_canvas.find_withtag("all")[0], width=event.width)
 
 if __name__ == "__main__":
     root = tk.Tk()
