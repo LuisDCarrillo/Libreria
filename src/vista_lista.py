@@ -551,7 +551,7 @@ class VistaListaApp:
     def seleccionar_nodo(self, nodo):
         self.nodo_seleccionado = nodo
         self.actualizar_grafo()
-     def ventana_rendimiento(self):
+    def ventana_rendimiento(self):
             ventana = tk.Toplevel(self.root)
             ventana.title("Clasificación por Rendimiento Académico")
             ventana.geometry("900x400")
