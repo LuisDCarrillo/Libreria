@@ -160,7 +160,7 @@ class VistaListaApp:
 
         btn_style = {'padx': 5, 'pady': 2, 'width': 20}
 
-        tk.Button(self.frame_btns, text="Retirar Materias", command=self.eliminar_materia_estudiante).grid(row=2, column=0, pady=5)
+        tk.Button(self.frame_btns, text="Gestionar Materias", command=self.eliminar_materia_estudiante).grid(row=2, column=0, pady=5)
 
         # self.label_img_grafo = tk.Label(root)
         # self.label_img_grafo.pack(pady=10)
