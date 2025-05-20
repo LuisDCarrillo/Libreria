@@ -7,6 +7,7 @@ from Identificacion_estudiante import VistaIdentificacion_estudiantes
 import vista_resumenAcademico as vra
 from detector_duplicados import detectar_duplicados
 from Pila import Pila
+from DB_estudiantes import DBEstudiantes
 import json
 
 # Diccionario de materias y sus créditos
@@ -75,7 +76,9 @@ class VistaListaApp:
         # Center the content horizontally and handle resizing
         self.scroll_canvas.bind('<Configure>', self._on_canvas_configure)
 
-        self.lista_ingresados = Lista()
+        self.db = DBEstudiantes()
+        
+        self.lista_ingresados = self.db.Leer()
         self.lista_no_ingresados = Lista()
 
         self.pila_versiones = Pila()  # <-- Instancia de la pila para versiones
@@ -315,7 +318,8 @@ class VistaListaApp:
         while ultimo_nodo.prox is not None:
             ultimo_nodo = ultimo_nodo.prox
         destino.InsDespues(ultimo_nodo, estudiante)
-
+        
+     self.db.guardar(self.lista_ingresados)
      self.actualizar_tablas()
      self.limpiar_campos()
 
